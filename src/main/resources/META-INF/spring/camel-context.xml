@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:camel="http://camel.apache.org/schema/spring"
+	xmlns:osgi="http://www.springframework.org/schema/osgi"
+	xsi:schemaLocation="
+       http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/osgi http://www.springframework.org/schema/osgi/spring-osgi.xsd
+       http://camel.apache.org/schema/spring http://camel.apache.org/schema/spring/camel-spring.xsd">
+
+
+
+	<camelContext xmlns="http://camel.apache.org/schema/spring">
+		<route>
+			<from uri="apollo:queue:test.queue.1" />
+			<log message="The message contains ${body}" />
+		</route>
+	</camelContext>
+
+	<bean id="apollo" class="org.apache.camel.component.jms.JmsComponent">
+		<property name="configuration" ref="jmsConfiguration"/>
+	</bean>
+	
+	<bean id="jmsConfiguration" class="org.apache.camel.component.jms.JmsConfiguration">
+		<property name="connectionFactory" ref="cachingConnectionFactory"/>
+		<property name="maxConcurrentConsumers" value="10"/>
+	</bean>
+	
+	<bean id="cachingConnectionFactory" class="org.springframework.jms.connection.CachingConnectionFactory">
+		<property name="targetConnectionFactory" ref="connectionFactory"/>
+	</bean>
+	
+	<bean id="connectionFactory" class="org.fusesource.stomp.jms.StompJmsConnectionFactory">
+		<property name="brokerURI" value="tcp://localhost:61613" />
+		<property name="username" value="admin" />
+		<property name="password" value="password" />
+		<property name="forceAsyncSend" value="true" />
+	</bean>
+
+</beans>
